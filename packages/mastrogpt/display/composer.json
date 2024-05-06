@@ -1,0 +1,12 @@
+{
+    "name": "nuvolaris/starter-display",
+    "authors": [
+        {
+            "name": "d4rkstar",
+            "email": "d4rkstar@gmail.com"
+        }
+    ],
+    "require": {
+        "twig/twig": "^3.0"
+    }
+}
