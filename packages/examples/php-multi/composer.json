@@ -1,0 +1,18 @@
+{
+    "name": "nuvolaris/sample-php",
+    "description": "Sample PHP function",
+    "autoload": {
+        "psr-4": {
+            "nuvolaris\\phpstarter\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Bruno Salzano",
+            "email": "d4rkstar@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
