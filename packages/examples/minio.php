@@ -20,7 +20,12 @@
 
 //--web true
 //--kind php:default
+//--param MINIO_HOST $MINIO_HOST
+//--param MINIO_PORT $MINIO_PORT
+//--param MINIO_ACCESS_KEY $MINIO_ACCESS_KEY
+//--param MINIO_SECRET_KEY $MINIO_SECRET_KEY
+//--param MINIO_DATA_BUCKET $MINIO_DATA_BUCKET
 function main(array $args) : array {
-  print "Running PHP function!";
-  return ['body'=>'Hello from Nuvolaris!'];
+  
+  return ['body'=>'Minio'];
 }
