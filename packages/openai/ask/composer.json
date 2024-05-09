@@ -1,0 +1,24 @@
+{
+    "name": "nuvolaris/openai-chat",
+    "autoload": {
+        "psr-4": {
+            "Nuvolaris\\OpenAi\\Chat\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "bruno",
+            "email": "bruno@brunosalzano.com"
+        }
+    ],
+    "require": {
+        "openai-php/client": "^0.8.5",
+        "symfony/http-client": "^7.0",
+        "nyholm/psr7": "^1.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

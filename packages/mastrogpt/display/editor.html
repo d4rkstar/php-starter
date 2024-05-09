@@ -27,6 +27,6 @@
   }
   </style>
   <span id="language">{{language}}</span>
-  <pre id="code">{{{code}}}</pre>
+  <pre id="code">{% autoescape %}{{ code|raw }} {% endautoescape %}</pre>
   <iframe id="iframe-editor" src="/editor.html"></iframe>
   
