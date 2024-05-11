@@ -22,35 +22,55 @@
 //--param REDIS_URL $REDIS_URL
 //--param REDIS_PREFIX $REDIS_PREFIX
 
-function redis_key(string $key) : string {
+$REDIS_PREFIX = '';
+
+/***
+ * Retrieve a value from arguments, using a key
+ * @param array $args the array of arguments
+ * @param string $arg the key of the argument to be search
+ * @param string|null|int $default the default value
+ * @return string
+ */
+function get_arg($args, $arg, $default = null): string
+{
+  return array_key_exists($arg, $args) ? $args[$arg] : $default;
+}
+
+/***
+ * Generate a redis key using global REDIS_PREFIX
+ */
+function redis_key(string $key): string
+{
   global $REDIS_PREFIX;
   return sprintf('%s%s', $REDIS_PREFIX, $key);
 }
-function main(array $args) : array {
+
+function main(array $args): array
+{
   global $REDIS_PREFIX;
-  $REDIS_URL = array_key_exists('REDIS_URL',$args) ? $args['REDIS_URL'] : null;
-  $REDIS_PREFIX = array_key_exists('REDIS_PREFIX',$args) ? $args['REDIS_PREFIX'] : '';
+  $REDIS_URL = get_arg($args, 'REDIS_URL');
+  $REDIS_PREFIX = get_arg($args, 'REDIS_PREFIX');
+
   $result = '';
   if (!is_null($REDIS_URL)) {
-      $url_parts = parse_url($REDIS_URL);
-      $host = isset($url_parts['host']) ? $url_parts['host'] : '127.0.0.1';
-      $port = isset($url_parts['port']) ? $url_parts['port'] : 6379;
-      $user = isset($url_parts['user']) ? $url_parts['user'] : '';
-      $pass = isset($url_parts['pass']) ? $url_parts['pass'] : '';
-      
-      $redis = new Redis();
-      $redis->connect($host, $port);
-      if (!empty($user) && !empty($pass)) {
-        $redis->auth($user, $pass);
-      }
-      elseif(empty($user) && !empty($pass)) {
-        $redis->auth($pass);
-      }
-      $redis->set(redis_key('hello'), 'world');
-      $result = $redis->get(redis_key('hello'));
+    $url_parts = parse_url($REDIS_URL);
+    $host = isset($url_parts['host']) ? $url_parts['host'] : '127.0.0.1';
+    $port = isset($url_parts['port']) ? $url_parts['port'] : 6379;
+    $user = isset($url_parts['user']) ? $url_parts['user'] : '';
+    $pass = isset($url_parts['pass']) ? $url_parts['pass'] : '';
+
+    $redis = new Redis();
+    $redis->connect($host, $port);
+    if (!empty($user) && !empty($pass)) {
+      $redis->auth($user, $pass);
+    } elseif (empty($user) && !empty($pass)) {
+      $redis->auth($pass);
+    }
+    $redis->set(redis_key('hello'), 'world');
+    $result = $redis->get(redis_key('hello'));
 
   } else {
     $result = 'ERROR: REDIS_URL is not set';
   }
-  return ['body'=>$result];
+  return ['body' => $result];
 }

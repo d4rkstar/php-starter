@@ -30,11 +30,23 @@ require ('vendor/autoload.php');
 use Aws\S3\S3Client;
 use Aws\Credentials\Credentials;
 
-function get_arg($args, $arg, $default = null)
+/***
+ * Retrieve a value from arguments, using a key
+ * @param array $args the array of arguments
+ * @param string $arg the key of the argument to be search
+ * @param string|null|int $default the default value
+ * @return string
+ */
+function get_arg($args, $arg, $default = null): string
 {
   return array_key_exists($arg, $args) ? $args[$arg] : $default;
 }
 
+/***
+ * generate Minio configuration from arguments
+ * @param array $args the arguments
+ * @return array minio configuration array
+ */
 function get_config($args): array
 {
   $endpoint = sprintf('%s://%s:%s', 
@@ -58,7 +70,7 @@ function main(array $args): array
     $config = get_config($args);
     /** @var Aws\S3\S3ClientInterface $client */
     $s3Client = new S3Client($config);
-    
+
     // List buckets
     $buckets = $s3Client->listBuckets();  
 
