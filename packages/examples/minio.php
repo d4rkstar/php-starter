@@ -25,7 +25,46 @@
 //--param MINIO_ACCESS_KEY $MINIO_ACCESS_KEY
 //--param MINIO_SECRET_KEY $MINIO_SECRET_KEY
 //--param MINIO_DATA_BUCKET $MINIO_DATA_BUCKET
-function main(array $args) : array {
-  
-  return ['body'=>'Minio'];
+require ('vendor/autoload.php');
+
+use Aws\S3\S3Client;
+use Aws\Credentials\Credentials;
+
+function get_arg($args, $arg, $default = null)
+{
+  return array_key_exists($arg, $args) ? $args[$arg] : $default;
+}
+
+function get_config($args): array
+{
+  $endpoint = sprintf('%s://%s:%s', 
+    get_arg($args,'MINIO_PROTOCOL','http'),
+    get_arg($args,'MINIO_HOST'),
+    get_arg($args,'MINIO_PORT'));
+  return [
+    'endpoint'    => $endpoint,          
+    'credentials' => new Credentials(get_arg($args, 'MINIO_ACCESS_KEY'),get_arg($args, 'MINIO_SECRET_KEY')),
+    'region'      => get_arg($args, 'MINIO_REGION','us-east-1'),
+    'bucket'      => get_arg($args, 'MINIO_DATA_BUCKET'),
+    'bucket_endpoint' => false,
+    'disable_multiregion_access_points' => true,
+    'use_path_style_endpoint' => true,
+  ];
+}
+
+function main(array $args): array
+{
+  try {
+    $config = get_config($args);
+    /** @var Aws\S3\S3ClientInterface $client */
+    $s3Client = new S3Client($config);
+    
+    // List buckets
+    $buckets = $s3Client->listBuckets();  
+
+    return ['body' => ['buckets'=>$buckets['Buckets']] ];
+  }
+  catch(\Exception $ex) {
+    return ['body' => ['error'=>$ex->getMessage()] ];
+  }
 }
