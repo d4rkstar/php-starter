@@ -21,7 +21,59 @@
 //--web true
 //--kind php:default
 //--param MONGODB_URL $MONGODB_URL
-function main(array $args) : array {
-  
-  return ['body'=>'Mongo'];
+
+/***
+ * Retrieve a value from arguments, using a key
+ * @param array $args the array of arguments
+ * @param string $arg the key of the argument to be search
+ * @param string|null|int $default the default value
+ * @return string
+ */
+function get_arg($args, $arg, $default = null): string
+{
+  return array_key_exists($arg, $args) ? $args[$arg] : $default;
+}
+
+function main(array $args): array
+{
+   
+    try {
+        $url_parts = parse_url(get_arg($args, 'MONGODB_URL'));
+        $url_parts['database'] = str_replace('/','', $url_parts['path']);
+        $auth = '';
+        if (get_arg($url_parts,'user')) {
+            $auth=sprintf('%s:%s@',$url_parts['user'],$url_parts['pass']);
+        }
+        $url = sprintf('mongodb://%s%s:%s/%s?%s',
+            $auth,
+            $url_parts['host'],
+            $url_parts['port'],
+            $url_parts['database'],
+            $url_parts['query']
+        );
+        $namespace = sprintf("%s.%s", $url_parts['database'],'data');
+        $mongoManager = new  MongoDB\Driver\Manager($url,['username'=>$url_parts['user'],'password'=>$url_parts['pass']]);
+
+        $document = ['hello' => 'world'];
+
+        $bulkWrite = new MongoDB\Driver\BulkWrite;
+        $bulkWrite->insert($document);
+        $writeConcern = new MongoDB\Driver\WriteConcern(MongoDB\Driver\WriteConcern::MAJORITY, 1000);
+        $mongoManager->executeBulkWrite($namespace, $bulkWrite, $writeConcern);
+
+
+        $filter = [];
+        $query = new MongoDB\Driver\Query($filter);
+        $cursor = $mongoManager->executeQuery($namespace, $query);
+        $res = $cursor->toArray();
+
+        $bulkDelete = new MongoDB\Driver\BulkWrite;
+        $bulkDelete->delete([], ['limit' => 0]);
+        $mongoManager->executeBulkWrite($namespace, $bulkDelete);
+
+        return ['body' => $res];
+
+    } catch (\Exception $ex) {
+        return ['body' => ['error' => $ex->getMessage()]];
+    }
 }
