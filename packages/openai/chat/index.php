@@ -37,9 +37,11 @@ $AI = null;
 function req(string $msg)
 {
   $ROLE = <<<EOF
-  When requested to write code, pick Javascript.
-  When requested to show chess position, always use the FEN notation.
-  When showing HTML, put the code in the body tag. excluding HEAD and HTML tags
+When requested to write code, pick Javascript.
+When requested to show chess position, always use the FEN notation.
+When showing HTML, always include what is in the body tag,
+but exclude the code surrounding the actual content.
+So exclude always BODY, HEAD and HTML .
 EOF;
   return [
     'messages' => [
@@ -67,42 +69,37 @@ function ask(string $input): string
 
 function extractMsg(string $text): array
 {
-  $res = [];
-  // search for a chess position
-  $chessPattern = "/(([rnbqkpRNBQKP1-8]{1,8}\/){7}[rnbqkpRNBQKP1-8]{1,8} [bw] (-|K?Q?k?q?) (-|[a-h][36]) \d+ \d+)/";
-  $chessMatches = null;
-  if (preg_match($chessPattern, $text, $chessMatches, PREG_OFFSET_CAPTURE, 0)) {
-    if (count($chessMatches) > 0) {
-      $res['chess'] = $chessMatches[0][0];
-      return $res;
+  $res = array();
+
+    // search for a chess position
+    $chessPattern = '/(([rnbqkpRNBQKP1-8]{1,8}\/){7}[rnbqkpRNBQKP1-8]{1,8} [bw] (-|K?Q?k?q?) (-|[a-h][36]) \d+ \d+)/';
+    preg_match_all($chessPattern, $text, $chessMatches);
+    if (!empty($chessMatches[0])) {
+        $res['chess'] = $chessMatches[0][0];
+        return $res;
     }
-  }
 
-  $codePattern = '/```(\w+)\n(.*)```/ms';
-  $codeMatches = null;
-  if (preg_match($codePattern, $text, $codeMatches, PREG_OFFSET_CAPTURE, 0)) {
-
-    if (count($codeMatches) > 0) {
-      $language = $codeMatches[1][0];
-      $code = $codeMatches[2][0];
-      if ($language === "html") {        
-        // extract the body if any
-        $bodyPattern =  '/<body.*?>(.*?)<\/body>/ms';
-        $bodyMatches = [];
-        if (preg_match($bodyPattern, $code, $bodyMatches, PREG_OFFSET_CAPTURE, 0)) {          
-          if (count($bodyMatches) > 0) {
-            $html = $bodyMatches[1][0];
-          }
-          $res['html'] = $html;
-        }        
-      } else {
-        $res['language'] = $language;
-        $res['code'] = $code;
-      }     
+    // search for code
+    $codePattern = '/```(\w+)\n(.*?)```/s';
+    preg_match_all($codePattern, $text, $codeMatches);
+    if (!empty($codeMatches[0])) {
+        $match = $codeMatches;
+        if ($match[1][0] === "html") {
+            $html = $match[2][0];
+            // extract the body if any
+            $bodyPattern = '/<body.*?>(.*?)<\/body>/s';
+            preg_match($bodyPattern, $html, $bodyMatch);
+            if (!empty($bodyMatch[0])) {
+                $html = $bodyMatch[0];
+            }
+            $res['html'] = $html;
+            return $res;
+        }
+        $res['language'] = $match[1][0];
+        $res['code'] = $match[2][0];
+        return $res;
     }
-  }
-
-  return $res;
+    return $res;
 }
 
 function main(array $args): array
@@ -121,15 +118,17 @@ function main(array $args): array
     ->make();
 
   $input = isset($args['input']) ? $args['input'] : '';
-  $res = [
-    "output" => "Welcome to the OpenAI demo chat",
-    "title" => "OpenAI Chat",
-    "message" => "You can chat with OpenAI.",
-  ];
+  
   if ($input) {
     $output = ask($input);
     $res = extractMsg($output);
     $res['output'] = $output;
+  } else {
+    $res = [
+      "output" => "Welcome to the OpenAI demo chat",
+      "title" => "OpenAI Chat",
+      "message" => "You can chat with OpenAI.",
+    ];
   }
   return ['body' => $res];
 }

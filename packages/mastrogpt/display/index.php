@@ -76,6 +76,14 @@ function main(array $args) : array {
     }
 
   }
+  elseif(array_key_exists("message", $args)) {
+    if (!array_key_exists("title", $args)) {
+      $args['title'] = 'Message';
+    }
+    $template = $twig->load('message.html');
+    $out =$template->render($args);
+  
+  }
 
   $statusCode = $out=="" ? 204 : 200;
   return [

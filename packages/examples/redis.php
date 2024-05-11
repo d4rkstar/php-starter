@@ -22,7 +22,35 @@
 //--param REDIS_URL $REDIS_URL
 //--param REDIS_PREFIX $REDIS_PREFIX
 
+function redis_key(string $key) : string {
+  global $REDIS_PREFIX;
+  return sprintf('%s%s', $REDIS_PREFIX, $key);
+}
 function main(array $args) : array {
-  
-  return ['body'=>'Redis'];
+  global $REDIS_PREFIX;
+  $REDIS_URL = array_key_exists('REDIS_URL',$args) ? $args['REDIS_URL'] : null;
+  $REDIS_PREFIX = array_key_exists('REDIS_PREFIX',$args) ? $args['REDIS_PREFIX'] : '';
+  $result = '';
+  if (!is_null($REDIS_URL)) {
+      $url_parts = parse_url($REDIS_URL);
+      $host = isset($url_parts['host']) ? $url_parts['host'] : '127.0.0.1';
+      $port = isset($url_parts['port']) ? $url_parts['port'] : 6379;
+      $user = isset($url_parts['user']) ? $url_parts['user'] : '';
+      $pass = isset($url_parts['pass']) ? $url_parts['pass'] : '';
+      
+      $redis = new Redis();
+      $redis->connect($host, $port);
+      if (!empty($user) && !empty($pass)) {
+        $redis->auth($user, $pass);
+      }
+      elseif(empty($user) && !empty($pass)) {
+        $redis->auth($pass);
+      }
+      $redis->set(redis_key('hello'), 'world');
+      $result = $redis->get(redis_key('hello'));
+
+  } else {
+    $result = 'ERROR: REDIS_URL is not set';
+  }
+  return ['body'=>$result];
 }
