@@ -18,6 +18,7 @@
  * under the License.
  */
 
+//--web true
 //--kind php:default
 //--param REDIS_URL $REDIS_URL
 //--param REDIS_PREFIX $REDIS_PREFIX
@@ -54,6 +55,7 @@ function main(array $args): array
   $result = '';
   if (!is_null($REDIS_URL)) {
     $url_parts = parse_url($REDIS_URL);
+    print_r($url_parts);
     $host = isset($url_parts['host']) ? $url_parts['host'] : '127.0.0.1';
     $port = isset($url_parts['port']) ? $url_parts['port'] : 6379;
     $user = isset($url_parts['user']) ? $url_parts['user'] : '';
@@ -62,7 +64,7 @@ function main(array $args): array
     $redis = new Redis();
     $redis->connect($host, $port);
     if (!empty($user) && !empty($pass)) {
-      $redis->auth($user, $pass);
+      $redis->auth([$user, $pass]);
     } elseif (empty($user) && !empty($pass)) {
       $redis->auth($pass);
     }

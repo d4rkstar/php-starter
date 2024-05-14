@@ -19,7 +19,7 @@
  */
 
 //--web true
-//--kind php:default
+//--kind docker:ghcr.io/nuvolaris/runtime-php-v8.3:3.1.0-mastrogpt.2405131509
 
 function main(array $args) : array {
   $data = [
