@@ -1,10 +1,5 @@
 {
-    "name": "nuvolaris/openai-chat",
-    "autoload": {
-        "psr-4": {
-            "Nuvolaris\\OpenAi\\Chat\\": "src/"
-        }
-    },
+    "name": "nuvolaris/openai-ask",
     "authors": [
         {
             "name": "bruno",
