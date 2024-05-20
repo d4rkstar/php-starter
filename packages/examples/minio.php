@@ -58,6 +58,7 @@ function get_config($args): array
     'bucket_endpoint' => false,
     'disable_multiregion_access_points' => true,
     'use_path_style_endpoint' => true,
+    'version'=>'2006-03-01'
   ];
 }
 
