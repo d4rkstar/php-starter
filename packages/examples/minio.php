@@ -17,7 +17,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 //--web true
 //--kind php:default
 //--param MINIO_HOST $MINIO_HOST
@@ -25,8 +24,6 @@
 //--param MINIO_ACCESS_KEY $MINIO_ACCESS_KEY
 //--param MINIO_SECRET_KEY $MINIO_SECRET_KEY
 //--param MINIO_DATA_BUCKET $MINIO_DATA_BUCKET
-require ('vendor/autoload.php');
-
 use Aws\S3\S3Client;
 use Aws\Credentials\Credentials;
 
@@ -61,6 +58,7 @@ function get_config($args): array
     'bucket_endpoint' => false,
     'disable_multiregion_access_points' => true,
     'use_path_style_endpoint' => true,
+    'version'=>'2006-03-01'
   ];
 }
 
